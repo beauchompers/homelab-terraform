@@ -15,16 +15,18 @@ provider "proxmox" {
 }
 resource "proxmox_vm_qemu" "proxmox_vm" {
   count       = var.vm_count
-  name        = "${var.vm_prefix}${count.index}"
+  name        = "${var.vm_prefix}0${count.index + 1}"
   target_node = var.proxmox_node
 
   clone = var.proxmox_template_name
+  full_clone = true
 
   agent = 1
 
   cores   = var.proxmox_cores
   sockets = var.proxmox_sockets
   memory  = var.proxmox_memory
+  scsihw = "virtio-scsi-pci"
 
   ciuser = var.proxmox_cloud_init_user
   cipassword = var.proxmox_cloud_init_user_password
@@ -33,7 +35,7 @@ resource "proxmox_vm_qemu" "proxmox_vm" {
 
   disk {
     size    = var.proxmox_disk_space
-    type    = "virtio"
+    type    = "scsi"
     storage = var.proxmox_storage_pool
   }
 
