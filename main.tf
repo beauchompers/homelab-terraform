@@ -50,11 +50,18 @@ resource "proxmox_vm_qemu" "proxmox_vm" {
       password = var.proxmox_cloud_init_user_password
       host     = self.ssh_host
   }
+  
+  provisioner "file" {
+    source = "files/resize_disk.sh"
+    destination = "/tmp/resize_disk.sh"
+  }
 
   provisioner "remote-exec" {
     inline = [
       "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
       "echo cloud init done",
+      "sudo chmod +x /tmp/resize_disk.sh",
+      "sudo /tmp/resize_disk.sh",
       "sudo shutdown -r +1"
     ]
   }
