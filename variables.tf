@@ -69,3 +69,8 @@ variable "proxmox_disk_space" {
   description = "amount of storage to assign"
   default     = "10G"
 }
+variable "proxmox_network" {
+  type        = string
+  description = "the network to attach to"
+  default     = "vmbr0"
+}

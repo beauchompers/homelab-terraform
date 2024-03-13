@@ -41,7 +41,7 @@ resource "proxmox_vm_qemu" "proxmox_vm" {
 
   network {
     model  = "virtio"
-    bridge = "vmbr0"
+    bridge = var.proxmox_network
   }
 
   connection {
