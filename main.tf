@@ -2,7 +2,8 @@ terraform {
   required_providers {
     proxmox = {
       source  = "telmate/proxmox"
-      version = ">=2.9.6"
+      version = "3.0.1-rc4"
+      # version = ">=2.9.6"
     }
   }
 }
@@ -32,10 +33,13 @@ resource "proxmox_vm_qemu" "proxmox_vm" {
   cipassword = var.proxmox_cloud_init_user_password
 
   os_type = "cloud-init"
+  ipconfig0   = "ip=dhcp"
+
 
   disk {
     size    = var.proxmox_disk_space
-    type    = "scsi"
+    type    = "disk"
+    slot    = "scsi0"
     storage = var.proxmox_storage_pool
   }
 
@@ -48,7 +52,7 @@ resource "proxmox_vm_qemu" "proxmox_vm" {
       type     = "ssh"
       user     = var.proxmox_cloud_init_user
       password = var.proxmox_cloud_init_user_password
-      host     = self.ssh_host
+      host     = self.default_ipv4_address
   }
   
   provisioner "file" {
