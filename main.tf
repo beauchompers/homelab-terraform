@@ -36,15 +36,19 @@ resource "proxmox_vm_qemu" "proxmox_vm" {
     startup_delay    = -1
   }
 
+  # rhel 9 needs x86-64-v2 or newer and kernel panics on kvm64
   cpu {
     cores   = var.proxmox_cores
     sockets = var.proxmox_sockets
+    type    = var.proxmox_cpu_type
   }
   memory  = var.proxmox_memory
   scsihw = "virtio-scsi-pci"
 
   ciuser = var.proxmox_cloud_init_user
   cipassword = var.proxmox_cloud_init_user_password
+  sshkeys    = var.ssh_public_keys
+  ciupgrade  = var.proxmox_ciupgrade
 
   os_type = "cloud-init"
   ipconfig0   = count.index < length(var.static_ip_addresses) ? "ip=${var.static_ip_addresses[count.index]}/${var.static_ip_netmask},gw=${var.static_ip_gateway}" : "ip=dhcp"
@@ -72,25 +76,11 @@ resource "proxmox_vm_qemu" "proxmox_vm" {
     bridge = var.proxmox_network
   }
 
-  connection {
-      type     = "ssh"
-      user     = var.proxmox_cloud_init_user
-      password = var.proxmox_cloud_init_user_password
-      host     = self.default_ipv4_address
-  }
-  
-  provisioner "file" {
-    source = "files/resize_disk.sh"
-    destination = "/tmp/resize_disk.sh"
+  # the templates have serial0 for the xterm.js console; like drives, undeclared devices are removed
+  serial {
+    id   = 0
+    type = "socket"
   }
 
-  provisioner "remote-exec" {
-    inline = [
-      "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
-      "echo cloud init done",
-      "sudo chmod +x /tmp/resize_disk.sh",
-      "sudo /tmp/resize_disk.sh",
-      "sudo shutdown -r +1"
-    ]
-  }
+  # the templates grow the root disk on first boot via a cloud-init per-instance script, so no ssh provisioning is needed
 }

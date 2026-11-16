@@ -66,8 +66,8 @@ variable "proxmox_storage_pool" {
 }
 variable "proxmox_disk_space" {
   type        = string
-  description = "amount of storage to assign"
-  default     = "10G"
+  description = "amount of storage to assign. minimum 20G (the template disk size), larger disks are grown on first boot"
+  default     = "20G"
 }
 variable "proxmox_network" {
   type        = string
@@ -93,4 +93,19 @@ variable "uefi" {
   type        = bool
   description = "boot with OVMF/q35 instead of SeaBIOS. requires a UEFI template, which supplies the efidisk and secure boot keys"
   default     = false
+}
+variable "proxmox_cpu_type" {
+  type        = string
+  description = "cpu type to emulate. rhel 9 needs x86-64-v2 or newer, \"host\" also works"
+  default     = "x86-64-v2-AES"
+}
+variable "proxmox_ciupgrade" {
+  type        = bool
+  description = "upgrade packages on first boot via cloud-init. fails on unregistered rhel clones"
+  default     = false
+}
+variable "ssh_public_keys" {
+  type        = string
+  description = "ssh public keys (one per line) for the cloud-init user"
+  default     = null
 }
