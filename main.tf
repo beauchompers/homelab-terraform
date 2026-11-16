@@ -2,7 +2,7 @@ terraform {
   required_providers {
     proxmox = {
       source  = "telmate/proxmox"
-      version = "3.0.1-rc4"
+      version = "3.0.2-rc10"
       # version = ">=2.9.6"
     }
   }
@@ -23,9 +23,13 @@ resource "proxmox_vm_qemu" "proxmox_vm" {
   full_clone = true
 
   agent = 1
+  skip_ipv6 = true
+  power_state = "running"
 
-  cores   = var.proxmox_cores
-  sockets = var.proxmox_sockets
+  cpu {
+    cores   = var.proxmox_cores
+    sockets = var.proxmox_sockets
+  }
   memory  = var.proxmox_memory
   scsihw = "virtio-scsi-pci"
 
@@ -33,7 +37,7 @@ resource "proxmox_vm_qemu" "proxmox_vm" {
   cipassword = var.proxmox_cloud_init_user_password
 
   os_type = "cloud-init"
-  ipconfig0   = "ip=dhcp"
+  ipconfig0   = count.index < length(var.static_ip_addresses) ? "ip=${var.static_ip_addresses[count.index]}/${var.static_ip_netmask},gw=${var.static_ip_gateway}" : "ip=dhcp"
 
 
   disk {
@@ -41,9 +45,11 @@ resource "proxmox_vm_qemu" "proxmox_vm" {
     type    = "disk"
     slot    = "scsi0"
     storage = var.proxmox_storage_pool
+    format  = "raw"
   }
 
   network {
+    id     = 0
     model  = "virtio"
     bridge = var.proxmox_network
   }

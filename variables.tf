@@ -74,3 +74,18 @@ variable "proxmox_network" {
   description = "the network to attach to"
   default     = "vmbr0"
 }
+variable "static_ip_addresses" {
+  type        = list(string)
+  description = "list of static IP addresses to assign to VMs (optional). If not provided or list is shorter than vm_count, remaining VMs will use DHCP"
+  default     = []
+}
+variable "static_ip_gateway" {
+  type        = string
+  description = "gateway for static IP configuration (required if using static IPs)"
+  default     = null
+}
+variable "static_ip_netmask" {
+  type        = number
+  description = "netmask in CIDR notation for static IPs (e.g., 24 for 255.255.255.0)"
+  default     = 24
+}
