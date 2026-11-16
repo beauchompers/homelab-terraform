@@ -89,3 +89,8 @@ variable "static_ip_netmask" {
   description = "netmask in CIDR notation for static IPs (e.g., 24 for 255.255.255.0)"
   default     = 24
 }
+variable "uefi" {
+  type        = bool
+  description = "boot with OVMF/q35 instead of SeaBIOS. requires a UEFI template, which supplies the efidisk and secure boot keys"
+  default     = false
+}

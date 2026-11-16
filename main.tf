@@ -22,6 +22,10 @@ resource "proxmox_vm_qemu" "proxmox_vm" {
   clone = var.proxmox_template_name
   full_clone = true
 
+  # efidisk (and its secure boot keys) is inherited from the UEFI template, not managed here
+  bios    = var.uefi ? "ovmf" : "seabios"
+  machine = var.uefi ? "q35" : null
+
   agent = 1
   skip_ipv6 = true
   power_state = "running"
@@ -45,6 +49,14 @@ resource "proxmox_vm_qemu" "proxmox_vm" {
   os_type = "cloud-init"
   ipconfig0   = count.index < length(var.static_ip_addresses) ? "ip=${var.static_ip_addresses[count.index]}/${var.static_ip_netmask},gw=${var.static_ip_gateway}" : "ip=dhcp"
 
+
+  # the provider removes any drive not declared here, so the template's cloud-init drive must be listed.
+  # disks are compared by position and proxmox returns them sorted by slot, so keep ide0 before scsi0
+  disk {
+    type    = "cloudinit"
+    slot    = "ide0"
+    storage = var.proxmox_storage_pool
+  }
 
   disk {
     size    = var.proxmox_disk_space
