@@ -26,6 +26,12 @@ resource "proxmox_vm_qemu" "proxmox_vm" {
   skip_ipv6 = true
   power_state = "running"
 
+  startup_shutdown {
+    order            = -1
+    shutdown_timeout = -1
+    startup_delay    = -1
+  }
+
   cpu {
     cores   = var.proxmox_cores
     sockets = var.proxmox_sockets
